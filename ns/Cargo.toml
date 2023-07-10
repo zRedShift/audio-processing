@@ -1,0 +1,8 @@
+[package]
+edition = "2021"
+name = "audio-processing-ns"
+version = "0.1.0"
+
+[dependencies]
+num-complex.workspace = true
+static_assertions.workspace = true
