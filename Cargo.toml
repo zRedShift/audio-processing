@@ -1,9 +1,15 @@
 [workspace]
-members = ["ns", "signal"]
+members = ["codecs/*", "ns", "signal", "util", "validation"]
 resolver = "2"
 
 [workspace.dependencies]
+g711 = { path = "codecs/g711" }
 ns = { package = "audio-processing-ns", path = "ns" }
 num-complex = { version = "0.4.3", default-features = false }
 signal = { package = "audio-processing-signal", path = "signal" }
 static_assertions = "1.1.0"
+util = { package = "audio-processing-util", path = "util" }
+
+[profile.release]
+debug = true
+lto = "fat"

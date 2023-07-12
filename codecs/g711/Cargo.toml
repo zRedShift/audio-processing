@@ -1,0 +1,18 @@
+[package]
+name = "g711"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+util.workspace = true
+
+[features]
+nightly = ["util/nightly"]
+
+[dev-dependencies]
+criterion = "0.5.1"
+rand = "0.8.5"
+
+[[bench]]
+name = "encode"
+harness = false
