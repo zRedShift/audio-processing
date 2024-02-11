@@ -1,9 +1,8 @@
 [package]
 edition = "2021"
-name = "audio-processing-ns"
+name = "audio-processing-fft"
 version = "0.1.0"
 
 [dependencies]
+const_soft_float.workspace = true
 num-complex.workspace = true
-fft.workspace = true
-static_assertions.workspace = true

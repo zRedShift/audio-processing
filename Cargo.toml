@@ -1,8 +1,10 @@
 [workspace]
-members = ["ns", "signal"]
+members = ["fft", "ns", "signal"]
 resolver = "2"
 
 [workspace.dependencies]
+const_soft_float = "0.1.4"
+fft = { package = "audio-processing-fft", path = "fft" }
 ns = { package = "audio-processing-ns", path = "ns" }
 num-complex = { version = "0.4.3", default-features = false }
 signal = { package = "audio-processing-signal", path = "signal" }
