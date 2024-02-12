@@ -33,39 +33,39 @@ impl<
     > ComplexDftAdapter<F, FftHelper<COMPLEX, REAL, TWIDDLE>, true>
 {
     pub fn real_dft<'a>(&mut self, signal: &'a mut [f32; REAL]) -> &'a mut [C; COMPLEX] {
-        let spectrum = self.helper.cast_real_to_complex_mut(signal);
+        let spectrum = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum);
         self.helper.twiddle(spectrum);
         signal.iter_mut().for_each(|s| *s *= 0.5);
-        self.helper.cast_real_to_complex_mut(signal)
+        self.helper.cast_real_to_complex(signal)
     }
 
     pub fn inverse_real_dft<'a>(&mut self, spectrum: &'a mut [C; COMPLEX]) -> &'a mut [f32; REAL] {
         self.helper.twiddle_inv(spectrum);
         (self.fft)(spectrum);
-        let signal = self.helper.cast_complex_to_real_mut(spectrum);
+        let signal = self.helper.cast_complex_to_real(spectrum);
         signal.iter_mut().for_each(|s| *s *= Self::MULT);
         signal
     }
 }
 
 impl<
-        F: FnMut(&[C; COMPLEX], &mut [C; COMPLEX]),
+        F: FnMut(&mut [C; COMPLEX], &mut [C; COMPLEX]),
         const COMPLEX: usize,
         const REAL: usize,
         const TWIDDLE: usize,
     > ComplexDftAdapter<F, FftHelper<COMPLEX, REAL, TWIDDLE>, false>
 {
-    pub fn real_dft(&mut self, signal: &[f32; REAL], spectrum: &mut [C; COMPLEX]) {
+    pub fn real_dft(&mut self, signal: &mut [f32; REAL], spectrum: &mut [C; COMPLEX]) {
         let spectrum_in = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum_in, spectrum);
         self.helper.twiddle(spectrum);
-        self.helper.cast_complex_to_real_mut(spectrum).iter_mut().for_each(|s| *s *= 0.5);
+        self.helper.cast_complex_to_real(spectrum).iter_mut().for_each(|s| *s *= 0.5);
     }
 
     pub fn inverse_real_dft(&mut self, spectrum: &mut [C; COMPLEX], signal: &mut [f32; REAL]) {
         self.helper.twiddle_inv(spectrum);
-        let spectrum_out = self.helper.cast_real_to_complex_mut(signal);
+        let spectrum_out = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum, spectrum_out);
         signal.iter_mut().for_each(|s| *s *= Self::MULT);
     }
@@ -141,15 +141,11 @@ impl<const N: usize, const M: usize, const K: usize> FftHelper<N, M, K> {
         C::new(re + re, -im - im)
     }
 
-    fn cast_complex_to_real_mut<'a>(&self, spectrum: &'a mut [C; N]) -> &'a mut [f32; M] {
+    fn cast_complex_to_real<'a>(&self, spectrum: &'a mut [C; N]) -> &'a mut [f32; M] {
         unsafe { &mut *(spectrum as *mut _ as *mut _) }
     }
 
-    fn cast_real_to_complex<'a>(&self, signal: &'a [f32; M]) -> &'a [C; N] {
-        unsafe { &*(signal as *const _ as *const _) }
-    }
-
-    fn cast_real_to_complex_mut<'a>(&self, signal: &'a mut [f32; M]) -> &'a mut [C; N] {
+    fn cast_real_to_complex<'a>(&self, signal: &'a mut [f32; M]) -> &'a mut [C; N] {
         unsafe { &mut *(signal as *mut _ as *mut _) }
     }
 
