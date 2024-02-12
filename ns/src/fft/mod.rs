@@ -11,11 +11,11 @@ fft::complex_dft_adapter!(pub ComplexDftAdapter, FFT_SIZE, true);
 
 impl<F: FnMut(&mut ComplexSpectrum)> Fft for ComplexDftAdapter<F> {
     fn real_dft<'a>(&mut self, signal: &'a mut Signal) -> &'a mut ComplexSpectrum {
-        self.real_dft(signal)
+        self.real_dft(signal, true)
     }
 
     fn inverse_real_dft<'a>(&mut self, spectrum: &'a mut ComplexSpectrum) -> &'a mut Signal {
-        self.inverse_real_dft(spectrum)
+        self.inverse_real_dft(spectrum, true)
     }
 }
 

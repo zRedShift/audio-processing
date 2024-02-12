@@ -23,6 +23,18 @@ impl<F, const COMPLEX: usize, const REAL: usize, const TWIDDLE: usize, const IN_
         helper.assert();
         Self { fft, helper }
     }
+
+    fn normalize(signal: &mut [f32; REAL], normalize: bool) {
+        if normalize {
+            signal.iter_mut().for_each(|s| *s *= 0.5)
+        }
+    }
+
+    fn normalize_inverse(signal: &mut [f32; REAL], normalize: bool) {
+        if normalize {
+            signal.iter_mut().for_each(|s| *s *= Self::MULT)
+        }
+    }
 }
 
 impl<
@@ -32,19 +44,27 @@ impl<
         const TWIDDLE: usize,
     > ComplexDftAdapter<F, FftHelper<COMPLEX, REAL, TWIDDLE>, true>
 {
-    pub fn real_dft<'a>(&mut self, signal: &'a mut [f32; REAL]) -> &'a mut [C; COMPLEX] {
+    pub fn real_dft<'a>(
+        &mut self,
+        signal: &'a mut [f32; REAL],
+        normalize: bool,
+    ) -> &'a mut [C; COMPLEX] {
         let spectrum = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum);
         self.helper.twiddle(spectrum);
-        signal.iter_mut().for_each(|s| *s *= 0.5);
+        Self::normalize(signal, normalize);
         self.helper.cast_real_to_complex(signal)
     }
 
-    pub fn inverse_real_dft<'a>(&mut self, spectrum: &'a mut [C; COMPLEX]) -> &'a mut [f32; REAL] {
+    pub fn inverse_real_dft<'a>(
+        &mut self,
+        spectrum: &'a mut [C; COMPLEX],
+        normalize: bool,
+    ) -> &'a mut [f32; REAL] {
         self.helper.twiddle_inv(spectrum);
         (self.fft)(spectrum);
         let signal = self.helper.cast_complex_to_real(spectrum);
-        signal.iter_mut().for_each(|s| *s *= Self::MULT);
+        Self::normalize_inverse(signal, normalize);
         signal
     }
 }
@@ -56,18 +76,28 @@ impl<
         const TWIDDLE: usize,
     > ComplexDftAdapter<F, FftHelper<COMPLEX, REAL, TWIDDLE>, false>
 {
-    pub fn real_dft(&mut self, signal: &mut [f32; REAL], spectrum: &mut [C; COMPLEX]) {
+    pub fn real_dft(
+        &mut self,
+        signal: &mut [f32; REAL],
+        spectrum: &mut [C; COMPLEX],
+        normalize: bool,
+    ) {
         let spectrum_in = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum_in, spectrum);
         self.helper.twiddle(spectrum);
-        self.helper.cast_complex_to_real(spectrum).iter_mut().for_each(|s| *s *= 0.5);
+        Self::normalize(self.helper.cast_complex_to_real(spectrum), normalize)
     }
 
-    pub fn inverse_real_dft(&mut self, spectrum: &mut [C; COMPLEX], signal: &mut [f32; REAL]) {
+    pub fn inverse_real_dft(
+        &mut self,
+        spectrum: &mut [C; COMPLEX],
+        signal: &mut [f32; REAL],
+        normalize: bool,
+    ) {
         self.helper.twiddle_inv(spectrum);
         let spectrum_out = self.helper.cast_real_to_complex(signal);
         (self.fft)(spectrum, spectrum_out);
-        signal.iter_mut().for_each(|s| *s *= Self::MULT);
+        Self::normalize_inverse(signal, normalize);
     }
 }
 
